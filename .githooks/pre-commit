@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Block common secret patterns in staged changes.
+if ! command -v git >/dev/null 2>&1; then
+  exit 0
+fi
+
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+if [[ -z "${staged_files}" ]]; then
+  exit 0
+fi
+
+pattern='(AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|-----BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY-----|JWT_SECRET\s*=\s*[^C\n\r][^\n\r]*|DB_PASSWORD\s*=\s*[^C\n\r][^\n\r]*|MAIL_PASSWORD\s*=\s*[^\n\r]+|password\s*[:=]\s*["'"'"']?[^"'"'"'\s]{8,})'
+pattern='(AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|-----BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY-----|JWT_SECRET\s*=\s*[^C\n\r][^\n\r]*|DB_PASSWORD\s*=\s*[^C\n\r][^\n\r]*|MAIL_PASSWORD\s*=\s*[^\n\r]+)'
+
+# Safe placeholders allowed in templates and docs.
+allow_placeholder='(CHANGE_ME|YOUR_|<REPLACE|example|localhost|noreply@|^\+\s*#|^\+\s*$)'
+
+violations=0
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+
+  # Template and docs are allowed to contain non-sensitive placeholders.
+  if [[ "$file" == *.env.example || "$file" == *SECURITY-COMMIT-GUARD.md ]]; then
+    continue
+  fi
+
+  added_lines=$(git diff --cached -- "$file" | grep '^+' | grep -v '^+++' || true)
+  filtered_lines=$(printf '%s\n' "$added_lines" | grep -E -iv "$allow_placeholder" || true)
+
+  if printf '%s\n' "$filtered_lines" | grep -E -i "$pattern" >/dev/null 2>&1; then
+    echo "[secret-check] Potential secret detected in staged file: $file"
+    violations=1
+  fi
+done <<< "$staged_files"
+
+if [[ $violations -ne 0 ]]; then
+  cat <<'EOF'
+[secret-check] Commit blocked.
+[secret-check] Remove or redact secrets, then recommit.
+[secret-check] If this is a false positive, adjust .githooks/pre-commit.
+EOF
+  exit 1
+fi
+
+exit 0

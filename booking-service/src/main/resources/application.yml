@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: booking-service
+  datasource:
+    url: jdbc:h2:mem:carwash_booking;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS booking_schema
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: booking_schema
+    show-sql: false
+  flyway:
+    enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
+
+jwt:
+  secret: ${JWT_SECRET:CHANGE_ME_TO_A_LONG_RANDOM_SECRET_MIN_32_BYTES}
+  access-expiry-ms: ${JWT_ACCESS_EXPIRY_MS:900000}
+  refresh-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:604800000}
+  issuer: int216d-auth
+
+server:
+  port: 8083
+  servlet:
+    context-path: /api/v1
+
+logging:
+  level:
+    za.co.int216d: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+
+app:
+  scheduling:
+    enabled: ${SCHEDULING_ENABLED:true}
+    renewal-cron: ${SCHEDULING_RENEWAL_CRON:0 0 3 * * ?}
+    expiry-check-cron: ${SCHEDULING_EXPIRY_CHECK_CRON:0 30 0 * * ?}
+  payment:
+    enabled: ${PAYMENTS_ENABLED:true}
+    currency: ${PAYMENT_CURRENCY:ZAR}
+    default-gateway: ${PAYMENT_DEFAULT_GATEWAY:SIMULATED}
+    enabled-gateways: ${PAYMENT_ENABLED_GATEWAYS:SIMULATED}
+    simulated:
+      auto-approve: ${PAYMENT_SIMULATED_AUTO_APPROVE:true}
+      fail-rate: ${PAYMENT_SIMULATED_FAIL_RATE:0.0}

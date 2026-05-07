@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/int216d_carwash}
+    username: ${DB_USER:dev}
+    password: ${DB_PASSWORD:dev}
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    za.co.int216d: INFO

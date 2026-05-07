@@ -1,0 +1,42 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: client-service
+  datasource:
+    url: jdbc:h2:mem:carwash_client;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS client_schema
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: client_schema
+    open-in-view: false
+  flyway:
+    enabled: false
+
+jwt:
+  secret: ${JWT_SECRET:CHANGE_ME_TO_A_LONG_RANDOM_SECRET_MIN_32_BYTES}
+  access-expiry-ms: ${JWT_ACCESS_EXPIRY_MS:900000}
+  refresh-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:604800000}
+  issuer: int216d-auth
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    za.co.int216d: INFO

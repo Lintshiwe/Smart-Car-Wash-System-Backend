@@ -1,0 +1,22 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/int216d_carwash}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: true
+  kafka:
+    listener:
+      auto-startup: false
+
+logging:
+  level:
+    za.co.int216d: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
