@@ -49,6 +49,10 @@ spring:
           uri: ${BOOKING_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/v1/notifications/**
+        - id: booking-service-contact
+          uri: ${BOOKING_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/contact
 
 management:
   endpoints:
