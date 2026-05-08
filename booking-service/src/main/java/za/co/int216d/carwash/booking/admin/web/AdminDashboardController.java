@@ -161,4 +161,63 @@ public class AdminDashboardController {
         log.info("GET /admin/payments - Fetching all payments (page: {})", pageable.getPageNumber());
         return ResponseEntity.ok(paymentRepository.findAll(pageable));
     }
+
+    @PostMapping("/bookings/{bookingId}/cancel")
+    public ResponseEntity<Void> cancelBooking(@PathVariable Long bookingId) {
+        log.info("POST /admin/bookings/{}/cancel - Cancelling booking", bookingId);
+        Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+        booking.setStatus(za.co.int216d.carwash.booking.core.domain.BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/bookings/{bookingId}/delete")
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long bookingId) {
+        log.info("POST /admin/bookings/{}/delete - Deleting booking", bookingId);
+        bookingRepository.deleteById(bookingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/payments/{paymentId}/void")
+    public ResponseEntity<Void> voidPayment(@PathVariable Long paymentId) {
+        log.info("POST /admin/payments/{}/void - Voiding payment", paymentId);
+        PaymentTransaction payment = paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setStatus(za.co.int216d.carwash.booking.payment.domain.PaymentStatus.FAILED);
+        payment.setFailureReason("Voided by admin");
+        paymentRepository.save(payment);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/payments/{paymentId}/refund")
+    public ResponseEntity<Void> refundPayment(@PathVariable Long paymentId) {
+        log.info("POST /admin/payments/{}/refund - Refunding payment", paymentId);
+        PaymentTransaction payment = paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setStatus(za.co.int216d.carwash.booking.payment.domain.PaymentStatus.REFUNDED);
+        paymentRepository.save(payment);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/payments/{paymentId}/delete")
+    public ResponseEntity<Void> deletePayment(@PathVariable Long paymentId) {
+        log.info("POST /admin/payments/{}/delete - Deleting payment", paymentId);
+        paymentRepository.deleteById(paymentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/memberships/{clientId}/cancel")
+    public ResponseEntity<Void> cancelMembership(@PathVariable Long clientId) {
+        log.info("POST /admin/memberships/{}/cancel - Cancelling membership", clientId);
+        membershipService.cancelMembership(clientId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/memberships/{clientId}/reactivate")
+    public ResponseEntity<Void> reactivateMembership(@PathVariable Long clientId) {
+        log.info("POST /admin/memberships/{}/reactivate - Reactivating membership", clientId);
+        membershipService.reactivateMembership(clientId);
+        return ResponseEntity.noContent().build();
+    }
 }

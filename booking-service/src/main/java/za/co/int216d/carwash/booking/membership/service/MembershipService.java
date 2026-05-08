@@ -314,6 +314,25 @@ public class MembershipService {
     }
 
     /**
+     * Reactivate a suspended or expired membership (Admin only)
+     */
+    public void reactivateMembership(Long clientId) {
+        log.info("Reactivating membership for client {}", clientId);
+
+        Membership membership = membershipRepository.findByClientId(clientId)
+            .orElseThrow(() -> new ResourceNotFoundException("No membership found for client ID: " + clientId));
+
+        if (membership.getStatus() == Membership.MembershipStatus.ACTIVE) {
+            throw new BadRequestException("Membership is already active");
+        }
+
+        membership.setStatus(Membership.MembershipStatus.ACTIVE);
+        membership.setExpiryDate(LocalDateTime.now().plusMonths(1));
+        membershipRepository.save(membership);
+        log.info("Membership reactivated for client {}", clientId);
+    }
+
+    /**
      * Deduct credits from membership
      */
     public void deductCredits(Long clientId, Integer creditsToDeduct, String description) {

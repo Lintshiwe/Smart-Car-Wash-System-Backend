@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/bookings/slots").permitAll()
                 .requestMatchers(HttpMethod.GET, "/membership/plans/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/bookings/guest").permitAll()
+                .requestMatchers(HttpMethod.POST, "/contact").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
